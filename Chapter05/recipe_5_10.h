@@ -58,9 +58,9 @@ namespace recipe_5_10
          typedef ptrdiff_t                         difference_type;
 
       private:
-         pointer  ptr = nullptr;
-         size_t   index = 0;
-
+         pointer  ptr = nullptr;  // 基线，永远指向第一个元素，不是ownership
+         size_t   index = 0;      // index 才是定位器
+         // 指向同一个容器的两个iter才能比较
          bool compatible(self_type const& other) const
          {
             return ptr == other.ptr;
@@ -232,7 +232,8 @@ namespace recipe_5_10
       {
          return iterator(data, 0);
       }
-
+      // array中并没有iterator成员，每次调用begin() 都生成一个最新iter，聪明的规避了shallow copy的问题。
+      // 这个思路很有借鉴意义。 
       iterator end()
       {
          return iterator(data, SIZE);
