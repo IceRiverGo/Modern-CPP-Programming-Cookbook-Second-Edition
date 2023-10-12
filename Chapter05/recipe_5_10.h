@@ -30,8 +30,10 @@ namespace recipe_5_10
    class dummy_array
    {
       Type data[SIZE] = {};
-
+      // SIZE 固定了，是定长数组
    public:
+      // 以下两个[], 区别在哪里，何时被调用? 莫非一个用于左值，一个右值？
+      // 注意这个[]是由bound check的，与vector的[]不同。
       Type& operator[](size_t const index)
       {
          if (index < SIZE) return data[index];
@@ -43,14 +45,18 @@ namespace recipe_5_10
          if (index < SIZE) return data[index];
          throw std::out_of_range("index out of range");
       }
-
+      
       size_t size() const { return SIZE; }
-
-      template <typename T, size_t const Size>
+      
+      // 类中类
+      template <typename T, size_t const Size>  // 注意这个T可能是 const int，也可能是int。
       class dummy_array_iterator
       {
       public:
-         typedef dummy_array_iterator              self_type;
+         // class template 经常在内部定义多个类型别名，用于函数入参和返回值的类型等。
+         // 别名书写不但更简洁，也易维护。
+         // 能用using 替代typedef吗？
+         typedef dummy_array_iterator              self_type;  
          typedef T                                 value_type;
          typedef T& reference;
          typedef T* pointer;
@@ -223,9 +229,11 @@ namespace recipe_5_10
          }
          // --- random access iterator ---
       };
+      // 类中类结束，就普通的类定义。
 
+      // 注意以下仍然是别名，是在造类型，供begin/end函数中使用。
       typedef dummy_array_iterator<Type, SIZE>        iterator;
-      typedef dummy_array_iterator<Type const, SIZE>  constant_iterator;
+      typedef dummy_array_iterator<Type const, SIZE>  constant_iterator;  // const iter 是通过部分特化（加const）实现的，聪明，iter类本身不用考虑const与否。
 
    public:
       iterator begin()
